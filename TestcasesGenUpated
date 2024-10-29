@@ -1,0 +1,306 @@
+import tkinter as tk
+from tkinter import filedialog, messagebox
+import graphviz
+import os
+import platform
+import random
+
+# Function to create and display the CFG based on use case steps using Graphviz
+def create_cfg(main_scenario_steps, extension_steps):
+    dot = graphviz.Digraph(comment='Control Flow Graph')
+
+    # Start node
+    dot.node('Start', 'Start', shape='ellipse')
+
+    # Add nodes for main success scenario steps and connect sequentially
+    for i, step in enumerate(main_scenario_steps):
+        node_label = f'{step}'  # Sequential numbering
+        dot.node(f'{i + 1}', node_label, shape='ellipse')
+        if i == 0:
+            dot.edge('Start', f'{i + 1}')
+        else:
+            dot.edge(f'{i}', f'{i + 1}')
+
+    # Add end node
+    dot.node('End', 'End', shape='ellipse')
+    dot.edge(f'{len(main_scenario_steps)}', 'End')
+
+    # Add nodes and edges for extensions
+    ext_counter = len(main_scenario_steps) + 1
+    for ext_point, ext_description in extension_steps:
+        ext_node_id = f'{ext_counter}'
+        extension_label = f'{ext_counter}. {ext_description}'  # Sequential numbering for extensions
+        dot.node(ext_node_id, extension_label, shape='ellipse')
+        dot.edge(f'{ext_point + 1}', ext_node_id)  # Connect extension to the appropriate step
+        dot.edge(ext_node_id, 'End')  # Extension always leads to the end
+        ext_counter += 1
+
+    try:
+        # Save and display the CFG
+        output_file = dot.render('use_case_cfg', format='png', cleanup=False)
+        if platform.system() == 'Windows':
+            os.startfile(output_file)  # Windows
+        elif platform.system() == 'Darwin':
+            os.system(f'open {output_file}')  # macOS
+        else:
+            os.system(f'xdg-open {output_file}')  # Linux
+
+    except Exception as e:
+        messagebox.showerror("Error", f"Failed to create CFG: {str(e)}")
+
+# Function to calculate the coverage of a test case
+def coverage(test_case, all_edges):
+    covered_edges = set()
+    for i in range(len(test_case) - 1):
+        edge = (test_case[i], test_case[i + 1])
+        if edge in all_edges:
+            covered_edges.add(edge)
+    return covered_edges
+
+# Genetic algorithm to minimize the test cases while maintaining maximum coverage
+def genetic_algorithm(test_cases, all_edges, generations=100, population_size=10):
+    def fitness(individual):
+        coverage_set = set()
+        for tc in individual:
+            coverage_set.update(coverage(tc, all_edges))
+        return len(coverage_set) / len(all_edges)
+
+    population = [random.sample(test_cases, len(test_cases)) for _ in range(population_size)]
+    best_coverage = 0
+    best_individual = None
+
+    for generation in range(generations):
+        population_fitness = [(individual, fitness(individual)) for individual in population]
+        population_fitness.sort(key=lambda x: x[1], reverse=True)
+
+        new_population = [individual for individual, _ in population_fitness[:population_size // 2]]
+
+        # Update best individual if found in this generation
+        if population_fitness[0][1] > best_coverage:
+            best_coverage = population_fitness[0][1]
+            best_individual = population_fitness[0][0]
+
+        # Print the current generation
+        print(f"Generation: {generation + 1}")
+
+        while len(new_population) < population_size:
+            parent1, parent2 = random.sample(new_population, 2)
+            crossover_point = random.randint(1, len(parent1) - 1)
+            child1 = parent1[:crossover_point] + parent2[crossover_point:]
+            child2 = parent2[:crossover_point] + parent1[crossover_point:]
+
+            if random.random() < 0.1:
+                idx1, idx2 = random.sample(range(len(child1)), 2)
+                child1[idx1], child1[idx2] = child1[idx2], child1[idx1]
+
+            new_population.extend([child1, child2])
+
+        population = new_population
+
+    optimized_test_cases = []
+    covered_edges = set()
+    for test_case in best_individual:
+        if not coverage(test_case, all_edges).issubset(covered_edges):
+            optimized_test_cases.append(test_case)
+            covered_edges.update(coverage(test_case, all_edges))
+
+    # Display the best test case and its coverage
+    print("\nBest Test Path covering maximum edges:")
+    print(f"Best TC: {' -> '.join(best_individual[0])}")
+    
+    return optimized_test_cases
+
+# Generate all edges for the graph (for coverage calculation)
+def generate_all_edges(main_scenario_steps, extension_steps):
+    edges = set()
+
+    # Main path edges
+    for i in range(len(main_scenario_steps)):
+        if i == 0:
+            edges.add(('Start', '1'))
+        if i < len(main_scenario_steps) - 1:
+            edges.add((str(i + 1), str(i + 2)))
+        else:
+            edges.add((str(i + 1), 'End'))
+
+    # Extension path edges
+    ext_counter = len(main_scenario_steps) + 1
+    for ext_point, _ in extension_steps:
+        edges.add((str(ext_point + 1), str(ext_counter)))
+        edges.add((str(ext_counter), 'End'))
+        ext_counter += 1
+
+    return edges
+
+# Function to generate paths for test cases
+def generate_test_cases(main_scenario_steps, extension_steps):
+    paths = []
+
+    main_path = ['Start'] + [f'{i + 1}' for i in range(len(main_scenario_steps))] + ['End']
+    paths.append(main_path)
+
+    ext_counter = len(main_scenario_steps) + 1
+    for ext_point, ext_description in extension_steps:
+        ext_path = ['Start'] + [f'{i + 1}' for i in range(ext_point + 1)] + [f'{ext_counter}'] + ['End']
+        paths.append(ext_path)
+        ext_counter += 1
+
+    return paths
+
+# Function to optimize test cases and display results
+def optimize_test_cases(main_scenario_steps, extension_steps):
+    all_test_cases = generate_test_cases(main_scenario_steps, extension_steps)
+    all_edges = generate_all_edges(main_scenario_steps, extension_steps)
+
+    print("All test cases before optimization:")
+    for idx, tc in enumerate(all_test_cases):
+        print(f"TC{idx + 1}: {' -> '.join(tc)}")
+
+    optimized_test_cases = genetic_algorithm(all_test_cases, all_edges)
+
+    print("\nOptimized test cases:")
+    for idx, tc in enumerate(optimized_test_cases):
+        print(f"Optimized TC{idx + 1}: {' -> '.join(tc)}")
+
+# Function to process use case input from the form
+def save_to_file_and_create_cfg():
+    name = entry_name.get()
+    goal = entry_goal.get()
+    actors = entry_actors.get()
+    preconditions = entry_preconditions.get()
+    postconditions = entry_postconditions.get()
+    invariants = entry_invariants.get()
+    main_scenario = entry_main_scenario.get("1.0", tk.END).strip().split("\n")
+    extensions = entry_extensions.get("1.0", tk.END).strip().split("\n")
+    included_use_cases = entry_included_use_cases.get()
+
+    if not all([name, goal, actors, preconditions, postconditions, invariants, main_scenario, extensions, included_use_cases]):
+        messagebox.showwarning("Input Error", "Please fill in all fields.")
+        return
+
+    extension_steps = []
+    for extension in extensions:
+        if ":" in extension:
+            try:
+                ext_point, ext_description = extension.split(":")
+                ext_point = int(ext_point.strip()) - 1
+                ext_description = ext_description.strip()
+                extension_steps.append((ext_point, ext_description))
+            except ValueError:
+                print(f"Skipping invalid extension line: {extension}")
+                continue
+
+    create_cfg(main_scenario, extension_steps)
+    optimize_test_cases(main_scenario, extension_steps)
+
+# Function to load use case from a txt file and generate CFG
+def load_from_file_and_create_cfg():
+    file_path = filedialog.askopenfilename(title="Select Use Case File", filetypes=(("Text Files", "*.txt"),))
+    if not file_path:
+        return
+
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+
+    main_scenario_start = False
+    extensions_start = False
+    main_scenario_steps = []
+    extension_steps = []
+
+    for line in lines:
+        if "Main Success Scenario" in line:
+            main_scenario_start = True
+            extensions_start = False
+            continue
+        if "Extensions" in line:
+            main_scenario_start = False
+            extensions_start = True
+            continue
+        if "Included Use Cases" in line:
+            continue
+
+        if main_scenario_start:
+            main_scenario_steps.append(line.strip())
+        elif extensions_start:
+            if ":" in line:
+                try:
+                    ext_point, ext_description = line.strip().split(":")
+                    ext_point = int(ext_point.strip()) - 1
+                    ext_description = ext_description.strip()
+                    extension_steps.append((ext_point, ext_description))
+                except ValueError:
+                    print(f"Skipping invalid extension line: {line.strip()}")
+                    continue
+
+    create_cfg(main_scenario_steps, extension_steps)
+    optimize_test_cases(main_scenario_steps, extension_steps)
+
+# Function to switch between form input and file input
+def switch_to_form():
+    clear_widgets()
+    display_form_widgets()
+
+def switch_to_file():
+    clear_widgets()
+    load_from_file_and_create_cfg()
+
+# Clear all widgets from the main window
+def clear_widgets():
+    for widget in root.winfo_children():
+        widget.grid_forget()
+
+# Display form input widgets
+def display_form_widgets():
+    tk.Label(root, text="Name").grid(row=0, column=0)
+    entry_name.grid(row=0, column=1,sticky="ew")
+
+    tk.Label(root, text="Goal").grid(row=1, column=0)
+    entry_goal.grid(row=1, column=1,sticky="ew")
+
+    tk.Label(root, text="Actors").grid(row=2, column=0)
+    entry_actors.grid(row=2, column=1,sticky="ew")
+
+    tk.Label(root, text="Preconditions").grid(row=3, column=0)
+    entry_preconditions.grid(row=3, column=1,sticky="ew")
+
+    tk.Label(root, text="Postconditions").grid(row=4, column=0)
+    entry_postconditions.grid(row=4, column=1,sticky="ew")
+
+    tk.Label(root, text="Invariants").grid(row=5, column=0)
+    entry_invariants.grid(row=5, column=1, sticky="ew")
+
+    tk.Label(root, text="Main Success Scenario").grid(row=6, column=0)
+    entry_main_scenario.grid(row=6, column=1, columnspan=2, sticky="ew")
+
+    tk.Label(root, text="Extensions").grid(row=7, column=0)
+    entry_extensions.grid(row=7, column=1, columnspan=2, sticky="ew")
+
+    tk.Label(root, text="Included Use Cases").grid(row=8, column=0)
+    entry_included_use_cases.grid(row=8, column=1, columnspan=2, sticky="ew")
+
+    save_button.grid(row=9, column=1)
+
+# Create main window
+root = tk.Tk()
+root.title("Use Case Input and CFG Generator")
+
+# Create widgets for form
+entry_name = tk.Entry(root)
+entry_goal = tk.Entry(root)
+entry_actors = tk.Entry(root)
+entry_preconditions = tk.Entry(root)
+entry_postconditions = tk.Entry(root)
+entry_invariants = tk.Entry(root)
+entry_main_scenario = tk.Text(root, height=5, width=40)
+entry_extensions = tk.Text(root, height=5, width=40)
+entry_included_use_cases = tk.Entry(root)
+
+save_button = tk.Button(root, text="Save and Generate CFG", command=save_to_file_and_create_cfg)
+
+# Initial selection screen with two options
+tk.Label(root, text="Choose Input Method:").grid(row=0, column=0)
+tk.Button(root, text="Input via Form", command=switch_to_form).grid(row=1, column=0)
+tk.Button(root, text="Load from File", command=switch_to_file).grid(row=1, column=1)
+
+# Run the application
+root.mainloop()
