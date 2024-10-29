@@ -1,0 +1,17 @@
+Name: Online Purchase
+Goal: Allow customers to purchase products.
+Actors: Customer, Website
+Preconditions: Customer has an account.
+Postconditions: Order is completed.
+Invariants: Product availability.
+Main Success Scenario:
+1. User selects a product.
+2. System checks product availability.
+3. User adds the product to the cart.
+4. User chooses a payment method.
+5. System confirms payment.
+6. System displays purchase success message.
+Extensions:
+2: Product is out of stock
+4: Payment is declined.
+Include use cases Login

@@ -1,0 +1,25 @@
+Name: Process Payment
+Goal: To process and confirm payment for an order.
+Actors: Customer, Payment Gateway, Website
+Preconditions:
+Customer has added products to the cart and completed the checkout process.
+Customer has provided valid payment information.
+Payment gateway is available.
+Postconditions:
+Payment is successfully processed.
+The order is confirmed, and payment details are recorded.
+The system generates an invoice for the order.
+Invariants:
+Payment method must be valid (e.g., valid credit card or other authorized payment methods).
+The total payment amount must match the order total.
+Main Success Scenario:
+1. Customer reviews the order summary at checkout.
+2. Customer selects a payment method (e.g., credit card, PayPal).
+3. Customer enters payment details.
+4. Website securely sends payment information to the payment gateway.
+5. Payment gateway processes the payment and returns a success message.
+6. Website confirms the payment and updates the order status.
+7. System generates and sends a payment receipt to the customer.
+Extensions:
+ 3: Invalid payment information (e.g., incorrect card number). 
+ 4: Payment gateway is unavailable or times out. 

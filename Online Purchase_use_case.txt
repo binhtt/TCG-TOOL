@@ -1,0 +1,13 @@
+Name: Online Purchase
+Goal: Allow customers to purchase products.
+Actors: Customer,  Website
+Preconditions: Customer has an account.
+Postconditions: Order is completed.
+Invariants: Product availability.
+Main Success Scenario:
+1. Customer selects product
+2.  Customer proceeds to checkout.
+3.  Customer enters shipping details
+4.  System processes payment
+Extensions:
+Include use cases: 

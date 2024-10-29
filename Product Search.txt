@@ -1,0 +1,29 @@
+Name: Product Search
+Goal: Allow customers to find products on the website.
+Actors: Customer, Website
+Preconditions: Customer is on the website.
+Postconditions: Customer is presented with a list of relevant products.
+Invariants: Products must exist in the system.
+Main Success Scenario:
+1. Customer navigates to the search page or enters a search query in the search bar.
+2. System filters and displays a list of products matching the search query.
+3. Customer can refine the search results using filters (e.g., price, category, brand).
+4. Customer selects a product to view its details.
+Extensions:
+1: System displays a message indicating no products match the search query.
+System suggests alternative search terms or related products.
+2: System displays a list of possible interpretations of the search query.
+System allows the customer to select the correct interpretation.
+3: System displays a message indicating the product is out of stock.
+System suggests alternative products or offers to notify the customer when the product is back in stock.
+4: System displays a message indicating the product is not available in the customer's region.
+System suggests alternative products or offers to ship the product to the customer's region.
+5: System provides tools to help the customer refine the search results (e.g., sorting, pagination).
+6: System displays an error message indicating the search query is invalid.
+System provides suggestions for correcting the search query.
+7: System displays products that the customer has searched for or viewed in the past.
+8: System allows the customer to upload an image and search for similar products.
+9: System allows the customer to speak a search query and the system will search for relevant products.
+10.System provides product recommendations based on the customer's browsing history and preferences.
+System displays products that the customer might be interested in based on their past behavior.
+Include use cases: Login

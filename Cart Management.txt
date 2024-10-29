@@ -1,0 +1,15 @@
+Name: Cart Management
+Goal: Allow customers to add, remove, and modify products in their shopping cart.
+Actors: Customer, Website
+Preconditions: Customer is logged in or has an active session.
+Postconditions: Shopping cart is updated.
+Invariants: Product must be available in stock.
+Main Success Scenario:
+1. Customer navigates to the product page.
+2. Customer adds a product to the cart.
+3. Customer modifies product quantities or removes products.
+4. System updates the shopping cart with the new items.
+Extensions:
+2: Product is out of stock. 
+3: Customer is not logged in or session expired.
+Include use cases: Login, View Product Details

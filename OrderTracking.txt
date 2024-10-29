@@ -1,0 +1,14 @@
+Name: Order Tracking
+Goal: Allow customers to track the status of their orders.
+Actors: Customer, Website
+Preconditions: Customer has placed an order and is logged in.
+Postconditions: Customer is informed of the current status of the order.
+Invariants: Order must exist in the system.
+Main Success Scenario:
+1. Customer navigates to the order tracking page.
+2. Customer selects the order to track.
+3. System displays the current order status (e.g., shipped, delivered).
+Extensions: 
+2: Order is not found. 
+3: Shipping status is unavailable.
+Include use cases: Login

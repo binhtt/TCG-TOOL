@@ -1,0 +1,14 @@
+Name: Apply Discount Code
+Goal: Allow customers to apply a discount code during checkout.
+Actors: Customer, Website
+Preconditions: Customer is proceeding to checkout, and a valid discount code is available.
+Postconditions: Discount is applied to the order.
+Invariants: Discount code must be valid.
+Main Success Scenario:
+1. Customer enters a discount code at checkout.
+2. System validates the discount code.
+3. System applies the discount to the order total.
+Extensions: 
+2: Discount code is expired or invalid. 
+3: Discount cannot be applied to the selected products.
+Include use cases: Login, Online Purchase

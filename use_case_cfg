@@ -1,0 +1,24 @@
+// Control Flow Graph
+digraph {
+	Start [label=Start shape=ellipse]
+	1 [label="1. User selects a product." shape=ellipse]
+	Start -> 1
+	2 [label="2. System checks product availability." shape=ellipse]
+	1 -> 2
+	3 [label="3. User adds the product to the cart." shape=ellipse]
+	2 -> 3
+	4 [label="4. User chooses a payment method." shape=ellipse]
+	3 -> 4
+	5 [label="5. System confirms payment." shape=ellipse]
+	4 -> 5
+	6 [label="6. System displays purchase success message." shape=ellipse]
+	5 -> 6
+	End [label=End shape=ellipse]
+	6 -> End
+	7 [label="7. Product is out of stock" shape=ellipse]
+	2 -> 7
+	7 -> End
+	8 [label="8. Payment is declined." shape=ellipse]
+	4 -> 8
+	8 -> End
+}

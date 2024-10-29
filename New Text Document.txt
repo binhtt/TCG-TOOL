@@ -1,0 +1,23 @@
+Use Case Name: Online Purchase
+Goal: Allow customers to successfully purchase products.
+Actors: Customer, Website (System)
+Preconditions:
+Customer has an active account and is logged in.
+Postconditions:
+Order is completed, and confirmation is displayed.
+Invariants:
+Product availability must be ensured before proceeding with the purchase.
+Main Success Scenario:
+1. Customer logs into their account.
+2. Customer selects product from the product catalog.
+3. Customer proceeds to checkout and views their cart.
+4. Customer enters shipping details (or confirms previously saved details).
+5. System processes payment.
+6. Order confirmation is displayed to the customer.
+Extensions (Alternate Flows):
+1: System informs the customer that the product is unavailable.
+2: Customer may select another product or leave the cart empty.
+3: System informs the customer of payment failure.
+4: Customer re-enters payment details or selects another payment method.
+Include Use Case: Login:
+ Customer logs into their account before proceeding to select a product.

@@ -1,0 +1,15 @@
+Name: User Registration
+Goal: Allow a new user to create an account on the website.
+Actors: Customer, Website
+Preconditions: Customer is not already registered.
+Postconditions: Customer account is created.
+Invariants: Valid email and password.
+Main Success Scenario:
+1. Customer navigates to the registration page.
+2. Customer enters personal details (name, email, password, etc.).
+3. System validates the entered information.
+4. Customer receives a confirmation email.
+5. Customer confirms the email, and the account is activated.
+Extensions: 
+2: Email is already registered. 
+3: Password does not meet security requirements.

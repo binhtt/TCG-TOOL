@@ -1,0 +1,15 @@
+Name: Product Review Submission
+Goal: Allow customers to submit reviews for purchased products.
+Actors: Customer, Website
+Preconditions: Customer has made a purchase of the product.
+Postconditions: Review is submitted and pending approval.
+Invariants: Customer must be logged in.
+Main Success Scenario:
+1. Customer navigates to the product review section.
+2. Customer selects the product to review.
+3. Customer writes a review and submits it.
+4. System saves the review and marks it as pending approval.
+Extensions: 
+2: Product does not allow reviews.
+ 3: Review exceeds character limit.
+Include use cases: Login
